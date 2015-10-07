@@ -11,7 +11,7 @@ make
 You will need to place a firmware file at `/lib/firmware/[hid].fw` where you replace [hid] with the HID ID of your device.
 
 ## Using the driver
-You can start using the driver by `insmod silead.ko` in the working directory where you compiled the driver. 
+You can start using the driver by `sudo insmod silead.ko` in the working directory where you compiled the driver. 
 
 ## Installation
 Installation instructions will be added later.
