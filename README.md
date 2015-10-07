@@ -2,7 +2,12 @@
 Kernel space driver for Silead touch screen digitizers. Forked from Robert Dolca's dirver originally posted to [lkml](https://lkml.org/lkml/2015/8/25/738). 
 
 ## Compilation
-Assuming debian based operating systems like Ubuntu
+First you should get your kernel headers and build dependencies. Assuming debian based operating systems like Ubuntu
+```
+sudo apt-get install kernel-headers-$(uname -r)
+sudo apt-get build-dep linux-image-$(uname -r)
+```
+Then you can simply fetch this repository and compile it using
 ```
 sudo apt-get install -y git
 git clone https://github.com/sigboe/gslX68X.git && cd gslX68X
