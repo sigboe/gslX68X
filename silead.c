@@ -69,8 +69,8 @@
 #define SILEAD_STARTUP_SLEEP	30
 
 #define SILEAD_MAX_FINGERS	10
-#define SILEAD_MAX_X		1725
-#define SILEAD_MAX_Y		1145
+#define SILEAD_MAX_X		4095
+#define SILEAD_MAX_Y		4095
 
 enum silead_ts_power {
 	SILEAD_POWER_ON  = 1,
