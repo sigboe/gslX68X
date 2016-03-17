@@ -465,8 +465,6 @@ static int silead_ts_read_props(struct i2c_client *client)
 }
 
 #ifdef CONFIG_ACPI
-static const struct acpi_device_id silead_ts_acpi_match[];
-
 static int silead_ts_set_default_fw_name(struct silead_ts_data *data,
 					 const struct i2c_device_id *id)
 {
@@ -475,7 +473,7 @@ static int silead_ts_set_default_fw_name(struct silead_ts_data *data,
 	int i;
 
 	if (ACPI_HANDLE(dev)) {
-		acpi_id = acpi_match_device(silead_ts_acpi_match, dev);
+		acpi_id = acpi_match_device(dev->driver->acpi_match_table, dev);
 		if (!acpi_id)
 			return -ENODEV;
 
