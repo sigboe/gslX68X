@@ -465,8 +465,6 @@ static int silead_ts_read_props(struct i2c_client *client)
 }
 
 #ifdef CONFIG_ACPI
-static const struct acpi_device_id silead_ts_acpi_match[];
-
 static int silead_ts_set_default_fw_name(struct silead_ts_data *data,
 					 const struct i2c_device_id *id)
 {
@@ -475,16 +473,16 @@ static int silead_ts_set_default_fw_name(struct silead_ts_data *data,
 	int i;
 
 	if (ACPI_HANDLE(dev)) {
-		acpi_id = acpi_match_device(silead_ts_acpi_match, dev);
+		acpi_id = acpi_match_device(dev->driver->acpi_match_table, dev);
 		if (!acpi_id)
 			return -ENODEV;
 
-		sprintf(data->fw_name, "%s.fw", acpi_id->id);
+		snprintf(data->fw_name, sizeof(data->fw_name), "%s.fw", acpi_id->id);
 
 		for (i = 0; i < strlen(data->fw_name); i++)
 			data->fw_name[i] = tolower(data->fw_name[i]);
 	} else {
-		sprintf(data->fw_name, "%s.fw", id->name);
+		snprintf(data->fw_name, sizeof(data->fw_name), "%s.fw", id->name);
 	}
 
 	return 0;
@@ -493,7 +491,7 @@ static int silead_ts_set_default_fw_name(struct silead_ts_data *data,
 static int silead_ts_set_default_fw_name(struct silead_ts_data *data,
 					 const struct i2c_device_id *id)
 {
-	sprintf(data->fw_name, "%s.fw", id->name);
+	snprintf(data->fw_name, sizeof(data->fw_name), "%s.fw", id->name);
 	return 0;
 }
 #endif
@@ -531,7 +529,7 @@ static int silead_ts_probe(struct i2c_client *client,
 
 	/* Power GPIO pin */
 	data->gpio_power = devm_gpiod_get_index(dev, SILEAD_PWR_GPIO_NAME,
-						GPIOD_OUT_LOW, 1);
+						1, GPIOD_OUT_LOW);
 	if (IS_ERR(data->gpio_power)) {
 		dev_dbg(dev, "Shutdown GPIO request failed\n");
 		data->gpio_power = NULL;
@@ -614,7 +612,7 @@ static const struct acpi_device_id silead_ts_acpi_match[] = {
 	{ "GSL3670", 0 },
 	{ "GSL3675", 0 },
 	{ "GSL3692", 0 },
-        { "MSSL1680", 0 },
+	{ "MSSL1680", 0 },
 	{ }
 };
 MODULE_DEVICE_TABLE(acpi, silead_ts_acpi_match);
