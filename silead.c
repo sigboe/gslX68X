@@ -529,7 +529,7 @@ static int silead_ts_probe(struct i2c_client *client,
 
 	/* Power GPIO pin */
 	data->gpio_power = devm_gpiod_get_index(dev, SILEAD_PWR_GPIO_NAME,
-						1, GPIOD_OUT_LOW);
+						0, GPIOD_OUT_LOW);
 	if (IS_ERR(data->gpio_power)) {
 		dev_dbg(dev, "Shutdown GPIO request failed\n");
 		data->gpio_power = NULL;
