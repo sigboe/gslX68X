@@ -69,8 +69,8 @@
 #define SILEAD_STARTUP_SLEEP	30
 
 #define SILEAD_MAX_FINGERS	10
-#define SILEAD_MAX_X		4095
-#define SILEAD_MAX_Y		4095
+#define SILEAD_MAX_X		4096
+#define SILEAD_MAX_Y		4096
 
 enum silead_ts_power {
 	SILEAD_POWER_ON  = 1,
@@ -435,12 +435,14 @@ static int silead_ts_read_props(struct i2c_client *client)
 		dev_dbg(dev, "Resolution X read error %d\n", error);
 		data->x_max = SILEAD_MAX_X;
 	}
+	data->x_max--; /* Property contains size not max */
 
 	error = device_property_read_u32(dev, SILEAD_DP_Y_MAX, &data->y_max);
 	if (error) {
 		dev_dbg(dev, "Resolution Y read error %d\n", error);
 		data->y_max = SILEAD_MAX_Y;
 	}
+	data->y_max--; /* Property contains size not max */
 
 	error = device_property_read_u32(dev, SILEAD_DP_MAX_FINGERS,
 					 &data->max_fingers);
