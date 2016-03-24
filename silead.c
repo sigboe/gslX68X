@@ -83,9 +83,9 @@ struct silead_ts_data {
 	struct input_dev *input;
 	const char *custom_fw_name;
 	char fw_name[I2C_NAME_SIZE];
-	u16 x_max;
-	u16 y_max;
-	u8 max_fingers;
+	u32 x_max;
+	u32 y_max;
+	u32 max_fingers;
 	bool x_invert;
 	bool y_invert;
 	bool xy_swap;
@@ -430,20 +430,20 @@ static int silead_ts_read_props(struct i2c_client *client)
 	struct device *dev = &client->dev;
 	int error;
 
-	error = device_property_read_u16(dev, SILEAD_DP_X_MAX, &data->x_max);
+	error = device_property_read_u32(dev, SILEAD_DP_X_MAX, &data->x_max);
 	if (error) {
 		dev_dbg(dev, "Resolution X read error %d\n", error);
 		data->x_max = SILEAD_MAX_X;
 	}
 
-	error = device_property_read_u16(dev, SILEAD_DP_Y_MAX, &data->y_max);
+	error = device_property_read_u32(dev, SILEAD_DP_Y_MAX, &data->y_max);
 	if (error) {
 		dev_dbg(dev, "Resolution Y read error %d\n", error);
 		data->y_max = SILEAD_MAX_Y;
 	}
 
-	error = device_property_read_u8(dev, SILEAD_DP_MAX_FINGERS,
-				      &data->max_fingers);
+	error = device_property_read_u32(dev, SILEAD_DP_MAX_FINGERS,
+					 &data->max_fingers);
 	if (error) {
 		dev_dbg(dev, "Max fingers read error %d\n", error);
 		data->max_fingers = SILEAD_MAX_FINGERS;
