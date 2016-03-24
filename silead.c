@@ -215,6 +215,7 @@ static void silead_ts_read_data(struct i2c_client *client)
 			data->slots[index]);
 	}
 
+	input_mt_sync_frame(data->input);
 	input_sync(data->input);
 }
 
