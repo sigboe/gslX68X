@@ -56,7 +56,7 @@
 
 #define SILEAD_DP_X_INVERT	"touchscreen-x-invert"
 #define SILEAD_DP_Y_INVERT	"touchscreen-y-invert"
-#define SILEAD_DP_XY_SWAP	"touchscreen-xy-swap"
+#define SILEAD_DP_XY_SWAP	"touchscreen-swapped-x-y"
 #define SILEAD_DP_X_MAX		"touchscreen-size-x"
 #define SILEAD_DP_Y_MAX		"touchscreen-size-y"
 #define SILEAD_DP_MAX_FINGERS	"touchscreen-max-fingers"
