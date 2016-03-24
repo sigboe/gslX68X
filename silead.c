@@ -54,8 +54,8 @@
 #define SILEAD_POINT_HSB_MASK	0x0F
 #define SILEAD_TOUCH_ID_MASK	0xF0
 
-#define SILEAD_DP_X_INVERT	"touchscreen-x-invert"
-#define SILEAD_DP_Y_INVERT	"touchscreen-y-invert"
+#define SILEAD_DP_X_INVERT	"touchscreen-inverted-x"
+#define SILEAD_DP_Y_INVERT	"touchscreen-inverted-y"
 #define SILEAD_DP_XY_SWAP	"touchscreen-swapped-x-y"
 #define SILEAD_DP_X_MAX		"touchscreen-size-x"
 #define SILEAD_DP_Y_MAX		"touchscreen-size-y"
