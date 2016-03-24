@@ -111,10 +111,17 @@ static int silead_ts_request_input_dev(struct silead_ts_data *data)
 		return -ENOMEM;
 	}
 
-	input_set_abs_params(data->input, ABS_MT_POSITION_X, 0,
-			     data->x_max, 0, 0);
-	input_set_abs_params(data->input, ABS_MT_POSITION_Y, 0,
-			     data->y_max, 0, 0);
+	if (!data->xy_swap) {
+		input_set_abs_params(data->input, ABS_MT_POSITION_X, 0,
+				     data->x_max, 0, 0);
+		input_set_abs_params(data->input, ABS_MT_POSITION_Y, 0,
+				     data->y_max, 0, 0);
+	} else {
+		input_set_abs_params(data->input, ABS_MT_POSITION_X, 0,
+				     data->y_max, 0, 0);
+		input_set_abs_params(data->input, ABS_MT_POSITION_Y, 0,
+				     data->x_max, 0, 0);
+	}
 
 	input_mt_init_slots(data->input, data->max_fingers,
 			    INPUT_MT_DIRECT | INPUT_MT_DROP_UNUSED |
