@@ -53,14 +53,16 @@
 #define SILEAD_POINT_X_MSB_OFF	0x03
 #define SILEAD_POINT_HSB_MASK	0x0F
 #define SILEAD_TOUCH_ID_MASK	0xF0
+#define SILEAD_EXTRA_DATA_MASK	0xF0
 
 #define SILEAD_DP_X_INVERT	"touchscreen-inverted-x"
 #define SILEAD_DP_Y_INVERT	"touchscreen-inverted-y"
 #define SILEAD_DP_XY_SWAP	"touchscreen-swapped-x-y"
 #define SILEAD_DP_X_MAX		"touchscreen-size-x"
 #define SILEAD_DP_Y_MAX		"touchscreen-size-y"
-#define SILEAD_DP_MAX_FINGERS	"touchscreen-max-fingers"
+#define SILEAD_DP_MAX_FINGERS	"silead,max-fingers"
 #define SILEAD_DP_FW_NAME	"touchscreen-fw-name"
+#define SILEAD_DP_HOME_BUTTON   "silead,home-button"
 #define SILEAD_PWR_GPIO_NAME	"power"
 
 #define SILEAD_CMD_SLEEP_MIN	10000
@@ -71,6 +73,7 @@
 #define SILEAD_MAX_FINGERS	10
 #define SILEAD_MAX_X		4096
 #define SILEAD_MAX_Y		4096
+
 
 enum silead_ts_power {
 	SILEAD_POWER_ON  = 1,
@@ -89,6 +92,7 @@ struct silead_ts_data {
 	bool x_invert;
 	bool y_invert;
 	bool xy_swap;
+    bool home_button;
 	u32 chip_id;
 	struct input_mt_pos pos[SILEAD_MAX_FINGERS];
 	int slots[SILEAD_MAX_FINGERS];
@@ -127,6 +131,11 @@ static int silead_ts_request_input_dev(struct silead_ts_data *data)
 			    INPUT_MT_DIRECT | INPUT_MT_DROP_UNUSED |
 			    INPUT_MT_TRACK);
 
+	if(data->home_button)
+    {
+       input_set_capability(data->input, EV_KEY, KEY_LEFTMETA);
+    }
+    
 	data->input->name = SILEAD_TS_NAME;
 	data->input->phys = "input/ts";
 	data->input->id.bustype = BUS_I2C;
@@ -175,6 +184,8 @@ static void silead_ts_read_data(struct i2c_client *client)
 	struct device *dev = &client->dev;
 	u8 buf[SILEAD_TS_DATA_LEN];
 	int x, y, id, touch_nr, error, i, offset, index;
+ 	int softbutton;
+	bool softbutton_pressed;
 
 	error = i2c_smbus_read_i2c_block_data(client, SILEAD_REG_DATA,
 					    SILEAD_TS_DATA_LEN, buf);
@@ -187,11 +198,29 @@ static void silead_ts_read_data(struct i2c_client *client)
 
 	if (touch_nr < 0)
 		return;
+	if (touch_nr > data->max_fingers)
+        return;
 
 	dev_dbg(dev, "Touch number: %d\n", touch_nr);
 
 	for (i = 1; i <= touch_nr; i++) {
 		offset = i * SILEAD_POINT_DATA_LEN;
+
+		softbutton = (buf[offset + SILEAD_POINT_Y_MSB_OFF] & 
+					   SILEAD_EXTRA_DATA_MASK) >> 4;
+		if (softbutton) {
+			
+			 /*
+			 * For now only respond to softbutton == 0x01, some
+			 * tablets *without* a capacative button send 0x04
+			 * when crossing the edges of the screen.
+			 */
+			 			
+            if (softbutton == 0x01) softbutton_pressed = true;
+            
+			continue;
+		}
+
 
 		/* Bits 4-7 are the touch id */
 		id = (buf[offset + SILEAD_POINT_X_MSB_OFF] &
@@ -214,15 +243,22 @@ static void silead_ts_read_data(struct i2c_client *client)
 		data->pos[index].x = x;
 		data->pos[index].y = y;
 
-		input_mt_assign_slots(data->input, data->slots, data->pos,
-				      index, 0);
+#ifdef SOFTTRACKING
+		input_mt_assign_slots(data->input, data->slots, data->pos, index, 0);
+#else
+        data->slots[index] = id;
+        //data->slots[index] = 0;
+#endif
 		silead_ts_report_touch(data, x, y, data->slots[index]);
 
-		dev_dbg(dev, "x=%d y=%d hw_id=%d sw_id=%d\n", x, y, id,
-			data->slots[index]);
+		dev_dbg(dev, "x=%d y=%d hw_id=%d sw_id=%d\n", x, y, id,	data->slots[index]);
 	}
 
 	input_mt_sync_frame(data->input);
+	
+	if(data->home_button)
+		input_report_key(data->input, KEY_LEFTMETA, softbutton_pressed);
+
 	input_sync(data->input);
 }
 
@@ -463,10 +499,16 @@ static int silead_ts_read_props(struct i2c_client *client)
 	if (error)
 		dev_dbg(dev, "Firmware file name read error. Using default.");
 
+    data->x_invert = 0;
+    data->y_invert = 0;
+    data->xy_swap = 0;    
+    data->home_button = 0;
+
 	data->x_invert = device_property_read_bool(dev, SILEAD_DP_X_INVERT);
 	data->y_invert = device_property_read_bool(dev, SILEAD_DP_Y_INVERT);
 	data->xy_swap = device_property_read_bool(dev, SILEAD_DP_XY_SWAP);
-
+    data->home_button = device_property_read_bool(dev, SILEAD_DP_HOME_BUTTON);
+        
 	dev_dbg(dev, "x_max = %d, y_max = %d, max_fingers = %d, x_invert = %d, y_invert = %d, xy_swap = %d",
 		data->x_max, data->y_max, data->max_fingers, data->x_invert,
 		data->y_invert, data->xy_swap);
